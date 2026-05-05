@@ -3,11 +3,9 @@
 
 FROM ubuntu:24.04
 
-ARG EM_VERSION=4.0.7
-ARG ARM_GNU_TOOLCHAIN_VERSION=14.2.rel1
+ARG PEBBLEOS_SDK_VERSION=0.1.0
 
-ENV EM_VERSION=$EM_VERSION
-ENV ARM_GNU_TOOLCHAIN_VERSION=$ARM_GNU_TOOLCHAIN_VERSION
+ENV PEBBLEOS_SDK_VERSION=$PEBBLEOS_SDK_VERSION
 
 # Set default shell during Docker image build to bash
 SHELL ["/bin/bash", "-c"]
@@ -32,6 +30,7 @@ RUN apt-get -y update && \
     libncurses-dev \
     librsvg2-bin \
     make \
+    nodejs \
     python3-dev \
     python3-pip \
     python3-venv \
@@ -46,24 +45,18 @@ RUN wget -O doxygen.tar.gz "https://www.doxygen.nl/files/doxygen-1.14.0.linux.bi
     mv doxygen-1.14.0/bin/* /usr/bin/ && \
     rm -r doxygen-1.14.0 doxygen.tar.gz
 
-# Install ARM GNU Toolchain
-RUN wget -O arm-gnu-toolchain.tar.xz "https://developer.arm.com/-/media/Files/downloads/gnu/${ARM_GNU_TOOLCHAIN_VERSION}/binrel/arm-gnu-toolchain-${ARM_GNU_TOOLCHAIN_VERSION}-${HOSTTYPE}-arm-none-eabi.tar.xz" && \
-    tar xf arm-gnu-toolchain.tar.xz -C /opt && \
-    rm arm-gnu-toolchain.tar.xz && \
-    mv /opt/arm-gnu-toolchain-${ARM_GNU_TOOLCHAIN_VERSION}-${HOSTTYPE}-arm-none-eabi /opt/arm-gnu-toolchain
-
-ENV PATH="/opt/arm-gnu-toolchain/bin:$PATH"
-
-# Install EMSDK
-RUN git clone https://github.com/emscripten-core/emsdk.git /opt/emsdk --depth 1 && \
-    cd /opt/emsdk && \
-    ./emsdk install ${EM_VERSION} && \
-    ./emsdk activate ${EM_VERSION} && \
-    ln -s /opt/emsdk/node/* /opt/emsdk/node/node
-
-ENV PATH="/opt/emsdk:/opt/emsdk/upstream/emscripten:/opt/emsdk/node/node/bin:$PATH"
+# Install PebbleOS SDK
+ENV PEBBLEOS_SDK_ROOT=/opt/pebbleos-sdk
+RUN wget -qO- "https://github.com/coredevices/PebbleOS-SDK/releases/download/v${PEBBLEOS_SDK_VERSION}/pebbleos-sdk-installer.sh" \
+    | sh -s -- --version "${PEBBLEOS_SDK_VERSION}" --prefix "${PEBBLEOS_SDK_ROOT}" --defaults
 
 # Create Python virtual environment
 RUN python3 -m venv /opt/venv
 
 ENV PATH="/opt/venv/bin:$PATH"
+
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["/bin/bash"]
