@@ -46,17 +46,10 @@ RUN wget -O doxygen.tar.gz "https://www.doxygen.nl/files/doxygen-1.14.0.linux.bi
     rm -r doxygen-1.14.0 doxygen.tar.gz
 
 # Install PebbleOS SDK
-ENV PEBBLEOS_SDK_ROOT=/opt/pebbleos-sdk
 RUN wget -qO- "https://github.com/coredevices/PebbleOS-SDK/releases/download/v${PEBBLEOS_SDK_VERSION}/pebbleos-sdk-installer.sh" \
-    | sh -s -- --version "${PEBBLEOS_SDK_VERSION}" --prefix "${PEBBLEOS_SDK_ROOT}" --defaults
+    | sh -s -- --version "${PEBBLEOS_SDK_VERSION}" --prefix /opt/pebbleos-sdk --defaults
 
 # Create Python virtual environment
 RUN python3 -m venv /opt/venv
 
 ENV PATH="/opt/venv/bin:$PATH"
-
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["/bin/bash"]
