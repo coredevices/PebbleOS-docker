@@ -18,6 +18,7 @@ RUN apt-get -y update && \
     apt-get install -y --no-install-recommends \
     bison \
     clang \
+    cmake \
     flex \
     gcc \
     gcc-multilib \
@@ -30,6 +31,7 @@ RUN apt-get -y update && \
     libncurses-dev \
     librsvg2-bin \
     make \
+    ninja-build \
     nodejs \
     python3-dev \
     python3-pip \
