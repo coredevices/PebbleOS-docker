@@ -30,9 +30,11 @@ RUN apt-get -y update && \
     libgtk-3-dev \
     libncurses-dev \
     librsvg2-bin \
+    libsdl2-dev \
     make \
     ninja-build \
     nodejs \
+    pkg-config \
     python3-dev \
     python3-pip \
     python3-venv \
