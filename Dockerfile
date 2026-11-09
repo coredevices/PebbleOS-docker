@@ -20,6 +20,7 @@ RUN apt-get -y update && \
     ccache \
     clang \
     cmake \
+    device-tree-compiler \
     flex \
     gcc \
     gcc-multilib \
