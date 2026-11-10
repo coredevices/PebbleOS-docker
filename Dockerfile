@@ -55,6 +55,16 @@ RUN wget -O doxygen.tar.gz "https://www.doxygen.nl/files/doxygen-1.14.0.linux.bi
 RUN wget -qO- "https://github.com/coredevices/PebbleOS-SDK/releases/download/v${PEBBLEOS_SDK_VERSION}/pebbleos-sdk-installer.sh" \
     | sh -s -- --version "${PEBBLEOS_SDK_VERSION}" --prefix /opt/pebbleos-sdk --defaults
 
+# Install Emscripten, which builds the native boards as WebAssembly
+ARG EMSCRIPTEN_VERSION=6.0.12
+RUN git clone --depth 1 --branch "${EMSCRIPTEN_VERSION}" https://github.com/emscripten-core/emsdk.git /opt/emsdk && \
+    /opt/emsdk/emsdk install "${EMSCRIPTEN_VERSION}" && \
+    /opt/emsdk/emsdk activate "${EMSCRIPTEN_VERSION}" && \
+    rm -rf /opt/emsdk/downloads
+
+ENV EMSDK=/opt/emsdk
+ENV PATH="/opt/emsdk:/opt/emsdk/upstream/emscripten:$PATH"
+
 # Create Python virtual environment
 RUN python3 -m venv /opt/venv
 
