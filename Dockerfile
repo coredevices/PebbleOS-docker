@@ -28,6 +28,7 @@ RUN apt-get -y update && \
     git \
     gettext \
     libfreetype6-dev \
+    libclang-dev \
     libglib2.0-dev \
     libgtk-3-dev \
     libncurses-dev \
@@ -64,6 +65,20 @@ RUN git clone --depth 1 --branch "${EMSCRIPTEN_VERSION}" https://github.com/emsc
 
 ENV EMSDK=/opt/emsdk
 ENV PATH="/opt/emsdk:/opt/emsdk/upstream/emscripten:$PATH"
+
+# Install Rust, for applications written in Rust, and bindgen for their
+# bindings. rust-toolchain.toml in the PebbleOS checkout picks the version.
+ARG RUST_VERSION=1.100
+ARG BINDGEN_VERSION=0.73.2
+ENV RUSTUP_HOME=/opt/rustup
+ENV CARGO_HOME=/opt/cargo
+ENV PATH="/opt/cargo/bin:$PATH"
+RUN wget -qO- https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal \
+        --default-toolchain "${RUST_VERSION}" \
+        --component clippy,rustfmt \
+        --target thumbv7em-none-eabi,thumbv7em-none-eabihf,thumbv8m.main-none-eabi,thumbv8m.main-none-eabihf,wasm32-unknown-emscripten && \
+    cargo install bindgen-cli --locked --version "${BINDGEN_VERSION}" && \
+    rm -rf /opt/cargo/registry /opt/cargo/git
 
 # Create Python virtual environment
 RUN python3 -m venv /opt/venv
